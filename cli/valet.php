@@ -57,6 +57,16 @@ if (is_dir(VALET_HOME_PATH)) {
     Site::pruneLinks();
 
     /**
+     * Makes sure that the root certificate exists.
+     * @author tassu
+     */
+    $app->command('root-cert', function () {
+        /** @var \Valet\CertificateHelper $certHelper */
+        $certHelper = Container::getInstance()->make(\Valet\CertificateHelper::class);
+        $certHelper->ensureRootCertificateExists();
+    })->descriptions('Makes sure that the root certificate exists.');
+
+    /**
      * Get or set the domain currently being used by Valet.
      */
     $app->command('domain [domain]', function ($domain = null) {

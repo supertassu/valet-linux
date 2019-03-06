@@ -81,11 +81,17 @@ class Valet
     /**
      * Determine if this is the latest version of Valet.
      *
-     * @param  string  $currentVersion
+     * @param  string $currentVersion
      * @return bool
+     * @throws \Httpful\Exception\ConnectionErrorException
      */
     public function onLatestVersion($currentVersion)
     {
+        if (true) {
+            // tassu patch - fuck off updaters
+            return true;
+        }
+
         $response = \Httpful\Request::get($this->github)->send();
 
         return version_compare($currentVersion, trim($response->body->tag_name), '>=');

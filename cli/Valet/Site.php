@@ -8,16 +8,21 @@ class Site
     public $cli;
     public $files;
 
+    /** @var CertificateHelper */
+    public $cert;
+
     /**
      * Create a new Site instance.
      *
      * @param  Configuration $config
      * @param  CommandLine $cli
      * @param  Filesystem $files
+     * @param  CertificateHelper $cert
      */
-    public function __construct(Configuration $config, CommandLine $cli, Filesystem $files)
+    public function __construct(Configuration $config, CommandLine $cli, Filesystem $files, CertificateHelper $cert)
     {
         $this->cli = $cli;
+        $this->cert = $cert;
         $this->files = $files;
         $this->config = $config;
     }
@@ -213,8 +218,7 @@ class Site
         $this->unsecure($url);
 
         $this->files->ensureDirExists($this->certificatesPath(), user());
-
-        $this->createCertificate($url);
+        $this->cert->createCertificateForSite($url);
 
         $this->createSecureNginxServer($url);
     }
@@ -224,8 +228,9 @@ class Site
      *
      * @param  string $url
      * @return void
+     * @deprecated
      */
-    public function createCertificate($url)
+    public function _createCertificate($url)
     {
         $keyPath = $this->certificatesPath() . '/' . $url . '.key';
         $csrPath = $this->certificatesPath() . '/' . $url . '.csr';
@@ -237,7 +242,7 @@ class Site
         $this->createSigningRequest($url, $keyPath, $csrPath, $confPath);
 
         $this->cli->runAsUser(sprintf(
-            'openssl x509 -req -sha256 -days 365 -in %s -signkey %s -out %s -extensions v3_req -extfile %s',
+            'openssl x509 -req -sha256 -days 365 -in %s -signkey %s -out %s -extensions san_env -extensions v3_req -extfile %s',
             $csrPath, $keyPath, $crtPath, $confPath
         ));
 
@@ -249,6 +254,7 @@ class Site
      *
      * @param  string $keyPath
      * @return void
+     * @deprecated
      */
     public function createPrivateKey($keyPath)
     {
@@ -260,6 +266,7 @@ class Site
      *
      * @param  string $keyPath
      * @return void
+     * @deprecated
      */
     public function createSigningRequest($url, $keyPath, $csrPath, $confPath)
     {
@@ -274,6 +281,7 @@ class Site
      *
      * @param  string $url
      * @return string
+     * @deprecated
      */
     public function buildCertificateConf($path, $url)
     {
